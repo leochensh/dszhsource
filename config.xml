@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<widget id="com.ionicframework.dszh284497" version="0.0.1" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
+    <name>鼎盛中华</name>
+    <description>
+        用于浏览鼎盛中华论坛的Android手机端应用。
+    </description>
+    <author email="leochen.shanghai@qq.com" href="">
+        Leo Chen
+    </author>
+    <content src="index.html"/>
+    <access origin="*"/>
+    <preference name="webviewbounce" value="false"/>
+    <preference name="UIWebViewBounce" value="false"/>
+    <preference name="DisallowOverscroll" value="false"/>
+    <preference name="BackupWebStorage" value="none"/>
+    <feature name="StatusBar">
+        <param name="ios-package" value="CDVStatusBar" onload="true"/>
+    </feature>
+
+    <feature name="URLEncoder">
+        <param name="android-package" value="com.dszh.plugin.URLEncoder" />
+
+    </feature>
+
+</widget>

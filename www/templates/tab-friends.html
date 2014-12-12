@@ -1,0 +1,41 @@
+<ion-view title="帖子">
+    <ion-nav-buttons side="right">
+        <button class="button  icon ion-compose button-clear" ng-click="writeMsg()">
+
+        </button>
+    </ion-nav-buttons>
+    <ion-content>
+        <ion-refresher
+                pulling-text="下拉刷新..."
+                on-refresh="doRefresh()">
+        </ion-refresher>
+        <div class="list">
+
+            <a class="item  my-item"
+               collection-repeat="data in dsdata"
+               collection-item-width="'100%'"
+               collection-item-height="85"
+               ng-style="{height:87}"
+               href="#/tab/friend/{{data.id}}/{{data.t}}">
+
+
+                <h2><img ng-src="{{data.logourl}}"/>{{data.author}}</h2>
+                <p>{{data.title}}</p>
+                <span class="badge badge-positive">{{data.readcount}}</span>
+                <div class="dsitemtime">
+                    {{data.timestr}}
+                </div>
+                <div class="dsbytenum">
+                    {{data.length}}字节
+                </div>
+            </a>
+
+        </div>
+        <ion-infinite-scroll
+                ng-if="allowinfinitescroll()"
+                icon="ion-loading-c"
+                on-infinite="loadMore()"
+                distance="10%">
+        </ion-infinite-scroll>
+    </ion-content>
+</ion-view>

@@ -1,0 +1,27 @@
+<ion-modal-view>
+    <ion-header-bar>
+        <button class="button button-icon icon ion-close-round"
+                ng-click="cancelChoose()"></button>
+        <h1 class="title">表情选择</h1>
+        <button class="button button-icon icon ion-checkmark-round"
+                ng-click="confirmChoose()"></button>
+
+    </ion-header-bar>
+    <ion-content>
+        <ion-radio
+<<<<<<< local
+                ng-repeat="num in facenum"
+                ng-model="facechoice"
+                ng-value="num"><img ng-src="{{faces[num]}}"/></ion-radio>
+=======
+                ng-repeat="num in faceselection.facenum"
+                ng-model="faceselection.facechoice"
+                ng-value="num" ng-switch on="num">
+            <span ng-switch-when="0">{{faceselection.faces[num]}}</span>
+            <img ng-switch-default ng-src="{{faceselection.faces[num]}}"/>
+
+        </ion-radio>
+>>>>>>> other
+
+    </ion-content>
+</ion-modal-view>

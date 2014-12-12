@@ -1,0 +1,33 @@
+<ion-view title="账号">
+  <ion-content >
+      <div class="list">
+
+          <div class="item item-divider">
+              当前账号
+          </div>
+
+          <div ng-switch on="loginInfo.ifLogin" class="item item-button-right" href="#">
+
+              <h2 ng-switch-when="false">无</h2>
+              <h2 ng-switch-when="true">{{loginInfo.userName}}</h2>
+              <button  ng-switch-when="false" class="button button-positive" ng-click="login()">
+                  登录
+              </button>
+              <button  ng-switch-when="true" class="button button-positive" ng-click="logout()">
+                  注销
+              </button>
+          </div>
+          <div class="item item-toggle">
+              记忆用户名和密码
+              <label class="toggle toggle-positive">
+                  <input ng-model="loginInfo.ifSave" type="checkbox">
+                  <div class="track">
+                      <div class="handle"></div>
+                  </div>
+              </label>
+          </div>
+
+
+      </div>
+  </ion-content>
+</ion-view>

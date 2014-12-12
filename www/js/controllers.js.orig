@@ -1,0 +1,286 @@
+
+angular.module('starter.controllers', [])
+
+    .controller('DashCtrl', function($scope) {
+    })
+
+    .controller('FriendsCtrl', function($scope,$scope,HttpClient,
+                                        DSZHDatas,$ionicLoading,
+                                        $ionicModal,Loginservice,faceData,
+                                        $ionicActionSheet) {
+
+
+
+        $ionicModal.fromTemplateUrl('templates/loginmodal.html', {
+            scope: $scope,
+            animation: 'slide-in-up'
+        }).then(function(modal) {
+            $scope.modal = modal;
+        });
+
+        $ionicModal.fromTemplateUrl('templates/writemsgmodal.html', {
+            scope: $scope,
+            animation: 'slide-in-up'
+        }).then(function(modal) {
+            $scope.modalMsg = modal;
+        });
+
+        $ionicModal.fromTemplateUrl('templates/facemodal.html', {
+            scope: $scope,
+            animation: 'slide-in-up'
+        }).then(function(modal) {
+            $scope.modalFace = modal;
+        });
+
+        $scope.sendmsg = {
+            face:""
+        }
+<<<<<<< local
+        $scope.facechoice = 0;
+=======
+        $scope.faceselection={};
+        $scope.faceselection.facechoice = 0;
+
+        $scope.faceselection.faces = faceData.faces;
+        $scope.faceselection.facenum = _.keys(faceData.faces);
+        $scope.faceselection.faceimg = _.values(faceData.faces);
+
+        $scope.faceFunc = function(num){
+            if(num == 0){
+                return $scope.faceselection.faces[num];
+            }
+            else{
+                return "<img src=\""+$scope.faceselection.faces[num]+"\"/>";
+            }
+        }
+
+>>>>>>> other
+        $scope.confirmChoose = function(){
+<<<<<<< local
+            $scope.sendmsg.face = faceData.faces[$scope.facechoice];
+=======
+            $scope.sendmsg.face = faceData.faces[$scope.faceselection.facechoice];
+            alert($scope.sendmsg.face);
+>>>>>>> other
+            $scope.modalFace.hide();
+        };
+        $scope.cancelChoose = function(){
+            $scope.modalFace.hide();
+        };
+
+
+        $scope.writeMsg = function(){
+            if(!Loginservice.ifLogin()){
+                $scope.modal.show();
+            }
+            else{
+                $scope.modalMsg.show();
+            }
+
+        };
+
+        $scope.cancelLogin = function(){
+            $scope.modal.hide();
+        };
+        $scope.cancelSend = function(){
+            $scope.modalMsg.hide();
+        };
+
+<<<<<<< local
+        $scope.faces = faceData.faces;
+        $scope.facenum = _.keys(faceData.faces);
+        $scope.faceimg = _.values(faceData.faces);
+=======
+
+>>>>>>> other
+
+        $scope.logindata = {};
+        $scope.loginmsg = {ifError:false,msg:"test"};
+
+        $scope.chooseFace = function(){
+            $scope.modalFace.show();
+        };
+        function appendImg(r){
+            var mr = r.match(/src\="([^"]*)"/);
+            var isrc = "<img src=\""+mr[1]+"\"/>";
+            if($scope.sendmsg.body){
+                $scope.sendmsg.body+=isrc;
+            }
+            else{
+                $scope.sendmsg.body = isrc;
+            }
+        }
+        $scope.insertImage = function(){
+            var hideSheet = $ionicActionSheet.show({
+                buttons: [
+                    { text: '拍照' },
+                    { text: '相册' }
+                ],
+
+                titleText: '插入图片',
+                cancelText: '取消',
+                cancel: function() {
+                    // add cancel code..
+                },
+                buttonClicked: function(index) {
+                    if(index == 0){
+                        navigator.camera.getPicture(function(imageUri){
+                                $ionicLoading.show({
+                                    template: '图片上传中...'
+                                });
+                                var options = new FileUploadOptions();
+                                options.fileKey = "upfile";
+                                var ft = new FileTransfer();
+                                ft.upload(imageUri,
+                                    encodeURI("http://dszh.org/upimg.php"),
+                                    function (r) {
+                                        console.log("Code = " + r.responseCode);
+                                        console.log("Response = " + r.response);
+                                        console.log("Sent = " + r.bytesSent);
+//                                        alert(r.response);
+                                        $ionicLoading.hide();
+                                        appendImg(r.response);
+                                    }, function(){
+                                        $ionicLoading.hide();
+                                    }, options);
+
+                            }, function(){},
+                            {quality: 25,
+                                sourceType : Camera.PictureSourceType.CAMERA,
+                                destinationType: Camera.DestinationType.FILE_URI,
+                                targetWidth: 1024,
+                                targetHeight: 1024});
+                    }
+                    if(index == 1){
+                        navigator.camera.getPicture(function(imageUri){
+                                $ionicLoading.show({
+                                    template: '图片上传中...'
+                                });
+                                var options = new FileUploadOptions();
+                                options.fileKey = "upfile";
+                                var ft = new FileTransfer();
+                                ft.upload(imageUri,
+                                    encodeURI("http://dszh.org/upimg.php"),
+                                    function (r) {
+                                        console.log("Code = " + r.responseCode);
+                                        console.log("Response = " + r.response);
+                                        console.log("Sent = " + r.bytesSent);
+//                                        alert(r.response);
+                                        $ionicLoading.hide();
+                                        appendImg(r.response);
+                                    }, function(){
+                                        $ionicLoading.hide();
+                                    }, options);
+
+                            }, function(){},
+                            {quality: 25,
+                                sourceType : Camera.PictureSourceType.PHOTOLIBRARY,
+                                destinationType: Camera.DestinationType.FILE_URI,
+                                targetWidth: 1024,
+                                targetHeight: 1024});
+                    }
+                    return true;
+                }
+            });
+        }
+
+        $scope.doLogin = function(){
+
+            if($scope.logindata.username && $scope.logindata.password){
+                $scope.loginmsg.ifError = false;
+                $ionicLoading.show({
+                    template: '正在登录...'
+                });
+                cordova.exec(function(str){
+                    console.log(str);
+                    HttpClient.doLogin(str,$scope.logindata.password,function(data){
+                        console.log(data);
+                        $ionicLoading.hide();
+                        if(data.indexOf("请输入登陆数据")>=0){
+                            $scope.loginmsg.ifError = true;
+                            $scope.loginmsg.msg = "用户名或密码错误";
+                        }
+                        else{
+                            Loginservice.setLoginSuccess(str,$scope.logindata.password);
+                            $scope.modal.hide();
+
+                        }
+                    });
+
+                }, function(err) {
+                    console.log(err);
+                }, "URLEncoder", "echo", [$scope.logindata.username]);
+
+//                $scope.modal.hide();
+            }
+
+        };
+        $scope.doSend = function(){
+            var title = $scope.sendmsg.title;
+            var body = $scope.sendmsg.body;
+<<<<<<< local
+            var face = $scope.facechoice;
+=======
+            var face = $scope.faceselection.facechoice;
+>>>>>>> other
+
+            if(title || body){
+                cordova.exec(function(str){
+//                    alert(str);
+
+                    HttpClient.doSendMsg(str[0],str[1],str[2],face,function(d){
+//                        alert(d);
+                    });
+//                    HttpClient.doLogin(str,$scope.logindata.password,function(data){
+//                        console.log(data);
+//                        $ionicLoading.hide();
+//                        if(data.indexOf("请输入登陆数据")>=0){
+//                            $scope.loginmsg.ifError = true;
+//                            $scope.loginmsg.msg = "用户名或密码错误";
+//                        }
+//                        else{
+//                            Loginservice.setLoginSuccess(str,$scope.logindata.password);
+//                            $scope.modal.hide();
+//
+//                        }
+//                    });
+
+                }, function(err) {
+                    console.log(err);
+                }, "URLEncoder", "arrayencode", [3,title,body,"提交至论坛"]);
+            }
+        };
+        DSZHDatas.getFullData(function(data){
+            $scope.dsdata = data;
+        });
+
+    })
+
+    .controller('FriendDetailCtrl', function($scope, $stateParams,
+                                             Friends,HttpClient,DSZHDatas,Loginservice,$scope) {
+        var ttitle = DSZHDatas.getMsgTitle($stateParams.id);
+        if(ttitle.length>15){
+            $scope.title = ttitle.slice(0,15)+"...";
+        }
+        else{
+            $scope.title = ttitle;
+        }
+        $scope.fulltitle = ttitle;
+        DSZHDatas.getDetailInfo($stateParams.id,$stateParams.t,function(d){
+            $scope.detail = d[0][1];
+            $scope.dsdata=d[1];
+
+        });
+
+        $scope.writeFeedback = function(){
+            if(!Loginservice.ifLogin()){
+                $scope.modal.remove().show();
+            }
+            else{
+                $scope.modalMsg.show();
+            }
+        }
+    })
+
+    .controller('AccountCtrl', function($scope) {
+    });

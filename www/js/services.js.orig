@@ -1,0 +1,313 @@
+angular.module('starter.services', [])
+
+/**
+ * A simple example service that returns some data.
+ */
+    .factory('Friends', function() {
+        // Might use a resource here that returns a JSON array
+
+        // Some fake testing data
+        var friends = [
+            { id: 0, name: 'Scruff McGruff' },
+            { id: 1, name: 'G.I. Joe' },
+            { id: 2, name: 'Miss Frizzle' },
+            { id: 3, name: 'Ash Ketchum' }
+        ];
+
+        return {
+            all: function() {
+                return friends;
+            },
+            get: function(friendId) {
+                // Simple index lookup
+                return friends[friendId];
+            }
+        }
+    })
+    .factory('HttpClient',function($http,Loginservice){
+        var baseUrl = "http://dszh.org";
+        return {
+            getPageNum:function(pnum,successcb,failcb){
+                $http.get(baseUrl+"/list.php?f=1&p="+pnum).
+                    success(function(data, status, headers, config) {
+                        successcb(data);
+                    }).
+                    error(function(data, status, headers, config) {
+                        failcb();
+                    });
+            },
+            getPageDetail:function(id,t,succb,failcb){
+                $http.get(baseUrl+"/show.php?f=1&t="+t+"&m="+id).
+                    success(function(data, status, headers, config) {
+                        succb(data);
+                    }).
+                    error(function(data, status, headers, config) {
+                        failcb();
+                    });
+            },
+            doLogin:function(uname,passwd,succb,failcb){
+//                alert("u="+uname+"&p="+passwd);
+                $http({
+                    method: 'POST',
+                    url: baseUrl+"/login.php",
+                    data: "u="+uname+"&p="+passwd,
+                    headers: {'Content-Type': 'application/x-www-form-urlencoded'}
+                }).success(function(data,status){
+                    succb(data);
+                }).error(function(data,status){
+                    failcb();
+                });
+
+            },
+            doSendMsg:function(title,body,submit,face,succb,failcb){
+//                alert("u="+uname+"&p="+passwd);
+                var uinfoarray = Loginservice.getLogininfo();
+                var uname = uinfoarray[0];
+                var passwd = uinfoarray[1];
+
+                var ustr = "u="+uname+"&p="+passwd+"&s="
+                    +title+"&b="+body+"&e="+face
+                    +"&submit="+submit;
+//                alert(ustr);
+                $http({
+                    method: 'POST',
+                    url: baseUrl+"/post.php?f=1&t=0&p=0",
+                    data: ustr,
+                    headers: {'Content-Type': 'application/x-www-form-urlencoded'}
+                }).success(function(data,status){
+                    succb(data);
+                }).error(function(data,status){
+                    failcb();
+                });
+
+            }
+        }
+    })
+    .factory("DSZHDatas",function(HttpClient,$ionicLoading){
+        var matchStr = /msgs\=(\[\[.*?\]\])/;
+
+        var matchDetailMsgStr = /msg\=(\[.*?\]);/;
+        var originalArray;
+        var parsedArray = [];
+        var pendingMap = {};
+
+        var idmsgmap = {};
+
+        var detailMsgCache = {};
+
+        function processParseData(odata,earray,emap,testd1){
+            console.log(odata);
+            for(var i in odata){
+                var d = odata[i];
+//                console.log(d);
+                if(!emap[d[0]]){
+                    emap[d[0]] = {
+                        id:d[0],
+                        fatherid:d[1],
+                        t:d[2],
+                        title:d[4],
+                        time:new Date(d[5]),
+                        timestr:d[5],
+                        sorttime:new Date(d[5]),
+                        readcount:d[8],
+                        author:d[9],
+                        length:d[10],
+                        childmsg:[]
+                    };
+
+                }
+                else{
+                    emap[d[0]].fatherid = d[1];
+                    emap[d[0]].t = d[2];
+                    emap[d[0]].title = d[4];
+                    emap[d[0]].time = new Date(d[5]);
+                    emap[d[0]].timestr = d[5];
+                    emap[d[0]].sorttime = new Date(d[5]);
+
+                    emap[d[0]].readcount = d[8];
+                    emap[d[0]].author = d[9];
+                    emap[d[0]].length = d[10];
+                }
+                if(d[6]){
+                    emap[d[0]].logourl = "img/"+d[6]+".gif";
+                }
+                else{
+                    emap[d[0]].logourl = "";
+                }
+                if(testd1(d)){
+                    earray.push(emap[d[0]]);
+                }
+                else{
+                    if(!emap[d[1]]){
+                        emap[d[1]] = {
+                            id:d[1],
+                            childmsg:[]
+                        };
+
+                    }
+                    emap[d[1]].childmsg.push(emap[d[0]]);
+                }
+            }
+//            console.log(earray);
+        }
+
+        var parseData = function(data){
+            data = data.replace(/'/g,'"');
+            data = data.replace(/\\/g,'');
+            var tr = data.match(matchStr);
+            originalArray = JSON.parse(tr[1]);
+
+            processParseData(originalArray,parsedArray,idmsgmap,function(d){
+                return d[1] == 0;
+            })
+
+
+        };
+
+        var getDetailJson = function(data,id){
+            data = data.replace(/'/g,'"');
+            data = data.replace(/,\]/g,']');
+            data = data.replace(/"\/upimg/g,'"http://dszh.org/upimg');
+            console.log(data);
+            data = data.replace(/\\(?![rn\/"])/g,"");
+//            data = data.replace(/\\r\\n/,'</br>');
+            console.log(data);
+            var tr = data.match(matchDetailMsgStr);
+
+
+            var jr = JSON.parse(tr[1]);
+            jr[1] = jr[1].replace(/\n/g,'<br/><br/>');
+
+            var msgDetaiParsedArray = [];
+            var msgIdMapTmp = {};
+
+            var msgTr = data.match(matchStr);
+            var detailArray = JSON.parse(msgTr[1]);
+            console.log(msgDetaiParsedArray);
+            processParseData(detailArray,msgDetaiParsedArray,msgIdMapTmp,function(d){
+
+                return d[1] == id && d[0] != id && d[1]!=0;
+            });
+
+
+            for(var i in msgIdMapTmp){
+                if(!idmsgmap[i]){
+                    idmsgmap[i] = msgIdMapTmp[i];
+                }
+            }
+
+            console.log(msgDetaiParsedArray);
+
+            return [jr,msgDetaiParsedArray];
+        };
+
+        return {
+            parseData:parseData,
+
+            getFullData:function(callback){
+                if(parsedArray.length == 0){
+                    $ionicLoading.show({
+                        template: 'Loading...'
+                    });
+                    HttpClient.getPageNum(1,function(data){
+
+                        $ionicLoading.hide();
+                        parseData(data);
+                        callback(parsedArray);
+
+                    });
+                }
+                else{
+                    callback(parsedArray);
+                }
+
+            },
+            getDetailInfo:function(id,t,cb){
+                if(detailMsgCache[id]){
+                    cb(detailMsgCache[id]);
+                }
+                else{
+                    $ionicLoading.show({
+                        template: 'Loading...'
+                    });
+                    HttpClient.getPageDetail(id,t,function(data){
+                        $ionicLoading.hide();
+                        var cr = getDetailJson(data,id);
+                        detailMsgCache[id] = cr;
+                        cb(cr);
+                    });
+                }
+
+            },
+            getMsgTitle:function(id){
+                if(idmsgmap[id]){
+                    return idmsgmap[id].title;
+                }
+                else{
+                    return "";
+                }
+            }
+        }
+    }).factory('Loginservice', function() {
+        // Might use a resource here that returns a JSON array
+
+        // Some fake testing data
+        var ifLogin = false;
+        var uname = "";
+        var passwd = "";
+
+        return {
+            ifLogin:function(){
+                return ifLogin;
+            },
+            setLoginSuccess:function(u,p){
+                ifLogin = true;
+                uname = u;
+                passwd = p;
+            },
+            getLogininfo:function(){
+                return [uname,passwd];
+            }
+        }
+    }).factory('faceData', function() {
+
+
+        return {
+            faces:{
+<<<<<<< local
+=======
+                0:"无",
+>>>>>>> other
+                1:"img/1.gif",
+                2:"img/2.gif",
+                3:"img/3.gif",
+                4:"img/4.gif",
+                5:"img/5.gif",
+                6:"img/6.gif",
+                7:"img/7.gif",
+                8:"img/8.gif",
+                9:"img/9.gif",
+                10:"img/10.gif",
+                11:"img/11.gif",
+                12:"img/12.gif",
+                13:"img/13.gif",
+                14:"img/14.gif",
+                15:"img/15.gif",
+                16:"img/16.gif",
+                17:"img/17.gif",
+                18:"img/18.gif",
+                21:"img/21.gif",
+                23:"img/23.gif",
+                25:"img/25.gif",
+                27:"img/27.gif",
+                29:"img/29.gif",
+                31:"img/31.gif",
+                33:"img/33.gif",
+                35:"img/35.gif",
+                37:"img/37.gif",
+                38:"img/38.gif",
+                39:"img/39.gif",
+                40:"img/40.gif"
+            }
+        }
+    });

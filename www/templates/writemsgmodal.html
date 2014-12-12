@@ -1,0 +1,38 @@
+<ion-modal-view>
+    <ion-header-bar>
+        <h1 class="title">发帖</h1>
+        <button class="button button-icon icon ion-image" ng-click="insertImage()"></button>
+    </ion-header-bar>
+    <ion-content>
+        <div class="list">
+            <label class="item item-input">
+                <input type="text" placeholder="标题" ng-model="sendmsg.title">
+            </label>
+
+            <label class="item">
+                <button class="button icon-left ion-happy" ng-click="chooseFace()">选择表情</button>
+                <span ng-switch on="sendmsg.face">
+                    <img ng-switch-default style="margin-left: 45px;margin-top: 10px;" ng-src="{{sendmsg.face}}"/>
+                    <span ng-switch-when="无"></span>
+                </span>
+
+            </label>
+
+            <label class="item item-input">
+                <textarea placeholder="内容"
+                          style="height: 8em;!important"
+                          ng-model="sendmsg.body"></textarea>
+            </label>
+
+        </div>
+        <h4 style="text-align: center;" class="assertive" ng-show="sendmsg.ifError">
+            {{sendmsg.msg}}
+        </h4>
+        <button class="button button-block button-assertive" ng-click="doSend()">
+            发布
+        </button>
+        <button class="button button-block button-calm" ng-click="cancelSend()">
+            取消
+        </button>
+    </ion-content>
+</ion-modal-view>

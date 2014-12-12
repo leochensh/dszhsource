@@ -1,0 +1,50 @@
+<!--
+  This template loads for the 'tab.friend-detail' state (app.js)
+  'friend' is a $scope variable created in the FriendsCtrl controller (controllers.js)
+  The FriendsCtrl pulls data from the Friends service (service.js)
+  The Friends service returns an array of friend data
+-->
+<ion-view title="{{title}}">
+    <ion-nav-buttons side="right">
+        <button class="button  icon ion-compose button-clear" ng-click="writeFeedback()">
+
+        </button>
+    </ion-nav-buttons>
+    <ion-content has-header="true" padding="true">
+        <ion-refresher
+                pulling-text="下拉刷新..."
+                on-refresh="doRefresh()">
+        </ion-refresher>
+        <h3>
+            {{fulltitle}}
+        </h3>
+        <div class="dsdetail" ng-bind-html="detail">
+
+        </div>
+        <h3>
+            回帖
+        </h3>
+        <hr>
+
+        <div class="list">
+
+            <a class="item  my-item"
+               ng-repeat="data in dsdata"
+
+               ng-style="{height:85}"
+               href="#/tab/friend/{{data.id}}/{{data.t}}">
+
+
+                <h2><img ng-src="{{data.logourl}}"/>{{data.author}}</h2>
+                <p>{{data.title}}</p>
+                <span class="badge badge-positive">{{data.readcount}}</span>
+                <div class="dsitemtime">
+                    {{data.timestr}}
+                </div>
+                <div class="dsbytenum">
+                    {{data.length}}字节
+                </div>
+            </a>
+        </div>
+    </ion-content>
+</ion-view>
