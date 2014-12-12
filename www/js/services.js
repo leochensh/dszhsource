@@ -486,7 +486,7 @@ angular.module('starter.services', [])
             }
         }
     }).factory('Modalservice', function($ionicModal,$ionicLoading,
-                                        HttpClient,faceData,$ionicActionSheet) {
+                                        HttpClient,faceData,$ionicActionSheet,Version) {
 
 
         return {
@@ -685,6 +685,8 @@ angular.module('starter.services', [])
                     title = title?title:"";
                     body = body?body:"";
 
+                    body+="\r\n发自Android客户端"+Version.getVersion()+"版本";
+
 
                     if(title || body){
                         $ionicLoading.show({
@@ -710,7 +712,7 @@ angular.module('starter.services', [])
             }
         }
     }).factory('Version', function() {
-        var version = 0.2;
+        var version = 0.5;
 
         return {
             getVersion:function(){

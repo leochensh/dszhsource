@@ -56,10 +56,10 @@ angular.module('starter', ['ionic', 'starter.controllers', 'starter.services','a
 
         $http.get("https://raw.githubusercontent.com/leochensh/dszh/master/README.md").success(function(data){
             var remoteVersion = parseFloat(data);
-            if(remoteVersion>Version.getVersion()){
+            if(remoteVersion-Version.getVersion()>0.05){
                 var confirmPopup = $ionicPopup.confirm({
                     title: '版本升级',
-                    template: '发现新版本，是否确定下载升级？'
+                    template: '当前版本'+Version.getVersion()+'发现新版本'+remoteVersion+'，是否下载升级？'
                 });
                 confirmPopup.then(function(res) {
                     if(res) {
